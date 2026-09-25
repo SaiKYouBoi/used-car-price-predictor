@@ -20,7 +20,6 @@ def encode_categoricals(df: pd.DataFrame):
     print(f"Resulting columns: {list(df.columns)}")
     return df
 
-
 def split_data(df: pd.DataFrame):
     cols_to_drop = ["selling_price"] + [c for c in ["name"] if c in df.columns]
     X = df.drop(columns=cols_to_drop)
@@ -30,7 +29,6 @@ def split_data(df: pd.DataFrame):
     )
     print(f"\nTrain/test split: X_train={X_train.shape}, X_test={X_test.shape}")
     return X_train, X_test, y_train, y_test
-
 
 def scale_features(X_train, X_test):
     scaler = StandardScaler()
@@ -47,4 +45,3 @@ def scale_features(X_train, X_test):
     print(f"  mean (first 4): {np.round(scaler.mean_[:4], 4)}")
     print(f"  std  (first 4): {np.round(scaler.scale_[:4], 4)}")
     return X_train_scaled, X_test_scaled, scaler
-
