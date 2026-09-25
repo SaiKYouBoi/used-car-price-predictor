@@ -4,7 +4,8 @@ from data_loader import load_data, encode_owner, check_structure
 from data_analysis import run_eda
 from cleaning import run_cleaning
 from preprocessing import encode_categoricals, split_data, scale_features
-
+from training import run_training
+from tuning import run_tuning
 
 def main():
     print("  STEP 1 — DATA EXPLORATION & CLEANING PIPELINE")
@@ -33,14 +34,30 @@ def main():
     print("\n8. scaling features with StandardScaler...")
     X_train_scaled, X_test_scaled, scaler = scale_features(X_train, X_test)
 
+    print("\n9.training baseline models...")
+    results_df, fitted_models = run_training(X_train_scaled, X_test_scaled, y_train, y_test)
     
-    print("pipline complte")
-    print(f"  X_train : {X_train_scaled.shape}")
-    print(f"  X_test  : {X_test_scaled.shape}")
-    print(f"  y_train : {y_train.shape}")
-    print(f"  y_test  : {y_test.shape}")
-    print(f"  Features: {list(X_train_scaled.columns)}")
-    print("\nReady for Step 2 — Model Training.")
+    print("\n10. hyperparameter tuning (RandomizedSearchCV, 5-fold CV)...")
+    comparison_df, tuned_models = run_tuning(
+        baseline_results=results_df,
+        fitted_models=fitted_models,
+        X_train=X_train_scaled,
+        X_test=X_test_scaled,
+        y_train=y_train,
+        y_test=y_test,
+        top_n=2,
+        n_iter=30,
+    )
+
+    print("\n\nBefore / After Tuning Summary")
+    print(comparison_df[["RMSE_before","RMSE_after","RMSE_delta",
+                          "R2_before","R2_after","R2_delta"]].to_string())
+
+    best_tuned = comparison_df["R2_after"].idxmax()
+    print(f"\nBest tuned model: {best_tuned}  "
+          f"(R2={comparison_df.loc[best_tuned,'R2_after']:.4f})")
+
+    print("\nPipeline complete.")
 
 
 if __name__ == "__main__":
