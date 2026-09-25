@@ -14,8 +14,9 @@ min_plausible_year = 1990
 
 
 owner_mapping = {
-    "First Owner": 0,
-    "Second Owner": 1,
-    "Third Owner": 2,
-    "Fourth & Above Owner": 3
+    "Test Drive Car":0,
+    "First Owner": 1,
+    "Second Owner": 2,
+    "Third Owner": 3,
+    "Fourth & Above Owner": 4
     }
