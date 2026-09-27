@@ -6,6 +6,7 @@ from cleaning import run_cleaning
 from preprocessing import encode_categoricals, split_data, scale_features
 from training import run_training
 from tuning import run_tuning
+from evaluation import run_evaluation
 
 def main():
     print("  STEP 1 — DATA EXPLORATION & CLEANING PIPELINE")
@@ -50,14 +51,28 @@ def main():
     )
 
     print("\n\nBefore / After Tuning Summary")
-    print(comparison_df[["RMSE_before","RMSE_after","RMSE_delta",
-                          "R2_before","R2_after","R2_delta"]].to_string())
+    print(comparison_df[["RMSE_before", "RMSE_after", "RMSE_delta",
+                          "R2_before", "R2_after", "R2_delta"]].to_string())
 
     best_tuned = comparison_df["R2_after"].idxmax()
     print(f"\nBest tuned model: {best_tuned}  "
-          f"(R2={comparison_df.loc[best_tuned,'R2_after']:.4f})")
+          f"(R2={comparison_df.loc[best_tuned, 'R2_after']:.4f})")
 
-    print("\nPipeline complete.")
+    print("\n11. comparison, visualization & final model selection...")
+    save_dir = Path(__file__).resolve().parents[1] / "data" / "processed"
+
+    winner_name, final_model, summary_df = run_evaluation(
+        baseline_results=results_df,
+        comparison_df=comparison_df,
+        fitted_models=fitted_models,
+        tuned_models=tuned_models,
+        X_test=X_test_scaled,
+        y_test=y_test,
+        save_dir=save_dir,
+    )
+
+    print(f"\nFinal model ready: {winner_name}")
+    print("Pipeline complete.")
 
 
 if __name__ == "__main__":
