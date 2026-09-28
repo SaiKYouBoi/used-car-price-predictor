@@ -7,6 +7,7 @@ from preprocessing import encode_categoricals, split_data, scale_features
 from training import run_training
 from tuning import run_tuning
 from evaluation import run_evaluation
+from export import export_model
 
 def main():
     print("  STEP 1 — DATA EXPLORATION & CLEANING PIPELINE")
@@ -72,7 +73,29 @@ def main():
     )
 
     print(f"\nFinal model ready: {winner_name}")
-    print("Pipeline complete.")
+
+    print("\n12. exporting final model and artifacts...")
+
+    winner_base  = winner_name.split(" (")[0] 
+    winner_stage = "Tuned" if "Tuned" in winner_name else "Baseline"
+    winner_row   = summary_df[
+        (summary_df["Model"] == winner_base) & (summary_df["Stage"] == winner_stage)
+    ]
+    if winner_row.empty:
+        winner_row = summary_df[summary_df["Stage"] == winner_stage].iloc[[0]]
+    winner_metrics = winner_row.iloc[0][["RMSE", "MAE", "R2"]].to_dict()
+
+    export_model(
+        model=final_model,
+        scaler=scaler,
+        feature_columns=X_train_scaled.columns.tolist(),
+        model_name=winner_name,
+        metrics=winner_metrics,
+    )
+
+    print("\nAll steps complete.")
+    print("  Run `python src/predict.py` to estimate a vehicle price.")
+    print("  Run `python src/predict.py --demo` for sample predictions.")
 
 
 if __name__ == "__main__":
